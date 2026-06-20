@@ -10,10 +10,11 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
-    "build": "tsc -b",
-    "clean": "tsc -b --clean",
-    "build:core": "tsc -b packages/core",
-    "build:web": "tsc -b packages/web",
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "build:core": "pnpm --filter @calc/core build",
+    "build:web": "pnpm --filter @calc/web... build",
+    "test": "pnpm -r test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
