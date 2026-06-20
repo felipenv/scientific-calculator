@@ -1,0 +1,109 @@
+# CI pipeline for the scientific-calculator monorepo (CALC-F01-W04).
+#
+# Runs the four baseline checks — lint, format-check, test, build — on every
+# pull request, plus on pushes to `main` so the default branch always carries a
+# status. Each check is its own job so it reports as an independently named
+# status check; the aggregating `ci` job rolls them up into a single
+# overall pass/fail.
+#
+# IMPORTANT — frozen check names. The job names below
+#   (`lint`, `format-check`, `test`, `build`, `ci`)
+# are the exact strings branch protection references as required status checks
+# in CALC-F01-W08. Renaming a job here silently un-requires it on `main` (the
+# old required name simply never reports again), so treat these names as a
+# frozen contract: do not rename without updating the branch-protection ruleset
+# in lockstep.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes; never cancel
+# in-flight runs on `main`.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# Read-only: these checks neither write to the repo nor need any extra scope.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  format-check:
+    name: format-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  # Aggregate gate: a single check that is green only when all four checks pass.
+  # Gives branch protection one overall status to require in addition to (or
+  # instead of) the individual checks, and fails fast if any upstream job was
+  # skipped or cancelled rather than reporting a misleading success.
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [lint, format-check, test, build]
+    steps:
+      - name: Verify all checks passed
+        run: |
+          echo "lint=${{ needs.lint.result }}"
+          echo "format-check=${{ needs.format-check.result }}"
+          echo "test=${{ needs.test.result }}"
+          echo "build=${{ needs.build.result }}"
+          if [ "${{ needs.lint.result }}" != "success" ] \
+            || [ "${{ needs.format-check.result }}" != "success" ] \
+            || [ "${{ needs.test.result }}" != "success" ] \
+            || [ "${{ needs.build.result }}" != "success" ]; then
+            echo "::error::One or more CI checks did not succeed."
+            exit 1
+          fi
+          echo "All CI checks passed."
