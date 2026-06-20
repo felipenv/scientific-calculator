@@ -1,10 +1,29 @@
 // @calc/core — UI-agnostic core library entrypoint.
 //
-// Placeholder only: this package carries NO calculator behavior yet. Arithmetic,
-// scientific functions, and the RPN engine arrive in later features (CALC-F02+).
-// This module exists solely to establish the buildable core/web seam (CALC-F01).
+// Operator implementations (arithmetic, scientific functions, the RPN engine)
+// arrive in later work items. What is published today is the foundational,
+// F03-shared surface: the error/result/angle-mode contract and the non-finite
+// guard that enforces the "never leak NaN/Infinity" invariant.
 //
 // Invariant: this package must never import a web/UI runtime (e.g. the DOM).
 
 /** Scaffolding marker proving the core package builds and is importable. */
 export const CORE_PACKAGE = '@calc/core' as const;
+
+// Shared contract (CALC-F02): error taxonomy, result wrapper, angle mode.
+export {
+  ErrorKind,
+  ok,
+  err,
+  AngleMode,
+  DEFAULT_ANGLE_MODE,
+} from './contract/index.js';
+export type { CalcError, Result } from './contract/index.js';
+
+// Non-finite guard (CALC-F02): maps stray NaN/Infinity to a typed kind.
+export {
+  finite,
+  isInteger,
+  isNegative,
+  isNonNegative,
+} from './guard/finite.js';
