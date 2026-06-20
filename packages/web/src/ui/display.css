@@ -1,0 +1,83 @@
+/*
+ * Calculator display styles (CALC-F04, FR12–FR16).
+ *
+ * Generic, original layout only: a numbered stack window over an entry line and
+ * an angle-mode label. No HP trade dress — no model colours, segment artwork, or
+ * legend placement (FR4/AC8). Feature work may restyle freely.
+ *
+ * The window shows a fixed count of stack levels (--calc-display-levels) and
+ * scrolls when the stack grows deeper, while the entry line — a sibling below
+ * the scroll container — stays pinned in view (FR13).
+ */
+
+.calc-display {
+  --calc-display-levels: 4;
+  --calc-display-row: 1.6rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid currentColor;
+  border-radius: 0.375rem;
+}
+
+.calc-display__header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Always-visible angle-mode label (FR16). */
+.calc-display__angle-mode {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+/* The bounded stack window: clipped to a fixed number of rows, scrollable when
+ * the stack runs deeper (FR12/FR13). */
+.calc-display__stack {
+  max-height: calc(var(--calc-display-row) * var(--calc-display-levels));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.calc-display__level {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: var(--calc-display-row);
+  line-height: var(--calc-display-row);
+}
+
+.calc-display__level-label {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  opacity: 0.55;
+}
+
+.calc-display__value {
+  flex: 1 1 auto;
+  text-align: right;
+  font-size: 1rem;
+  /* Long IEEE-754 strings (FR15) wrap rather than overflow the window. */
+  overflow-wrap: anywhere;
+}
+
+/* The command/entry line beneath level 1 (FR5), separated from the stack. */
+.calc-display__entry {
+  border-top: 1px solid currentColor;
+  padding-top: 0.25rem;
+  min-height: var(--calc-display-row);
+  line-height: var(--calc-display-row);
+}
+
+.calc-display__entry-value {
+  display: block;
+  text-align: right;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}

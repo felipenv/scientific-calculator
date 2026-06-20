@@ -1,0 +1,17 @@
+{
+  // The web bundle is produced by Vite (see vite.config.ts), so tsc is used for
+  // type-checking only: composite/emit are disabled and `tsc` runs with noEmit.
+  // This keeps tsc's output from colliding with Vite's dist/ artifacts.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // vite/client supplies ambient module declarations for asset imports such
+    // as `import './styles.css'` in main.ts.
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  "references": [{ "path": "../core" }]
+}
