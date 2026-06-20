@@ -12,9 +12,19 @@
 // are wrapped as `StackValue` (the FR11 typed-value seam) but the public surface
 // speaks raw `number` (FR10/AC8).
 //
-// This is the read/write foundation only: `push`, `pop`, `peek`, `peekN`,
-// `depth`. Operator application (applyUnary/applyBinary) and the management ops
-// (dup/swap/drop) land in later F03 work items on top of this surface.
+// This file carries the read/write foundation — `push`, `pop`, `peek`, `peekN`,
+// `depth` — plus the operator-application semantics `applyUnary`/`applyBinary`
+// (CALC-F03; FR3/FR4/FR8) that consume operands and push results. The management
+// ops (dup/swap/drop) land in a later F03 work item on top of this surface.
+//
+// Operator application is deliberately decoupled from the Calculation Engine
+// Core (F02): the apply methods take a plain numeric function and push back
+// *whatever value it returns*. They govern only arity, RPN operand order, and
+// atomic non-destructive underflow — never the math itself nor domain-error
+// surfacing, which stay the engine's contract. Each apply validates the
+// required depth *before* any mutation and reads operands before invoking the
+// supplied function, so an underflow (or a throwing function) leaves the stack
+// byte-for-byte unchanged (FR8/AC6).
 
 import type { StackValue } from './value.js';
 import { numberValue } from './value.js';
@@ -90,5 +100,52 @@ export class RpnStack {
       top.push(this.entries[this.entries.length - 1 - i].value);
     }
     return top;
+  }
+
+  /**
+   * Apply a unary operator (FR3/AC3). Reads level 1, calls `fn` with it, and
+   * replaces level 1 with the single result. Net depth change: 0.
+   *
+   * The core applies whatever value `fn` returns and computes no math itself
+   * (that is the Calculation Engine Core, F02); RPN order is trivial for arity
+   * one. The level-1 read happens before any mutation and the result replaces
+   * the operand in place, so a `fn` that throws leaves the stack unchanged.
+   *
+   * @throws {StackUnderflowError} when the stack is empty (depth 0). The depth
+   *   check runs before any mutation, so the stack is unchanged on throw.
+   */
+  applyUnary(fn: (a: number) => number): void {
+    const a = this.peek(); // throws StackUnderflowError if empty, no mutation
+    const result = fn(a); // if this throws, nothing has mutated yet
+    this.entries[this.entries.length - 1] = numberValue(result);
+  }
+
+  /**
+   * Apply a binary operator (FR4/AC2). Reads level 2 (left operand) and level 1
+   * (right operand), calls `fn(left, right)`, and pushes the single result in
+   * their place. Net depth change: −1.
+   *
+   * RPN operand order is `fn(level2, level1)` so non-commutative operators are
+   * correct — e.g. subtraction is `level2 − level1` and division `level2 ÷
+   * level1`. As with {@link applyUnary}, the core pushes back whatever `fn`
+   * returns and computes no math itself (F02 owns that and any domain errors).
+   *
+   * Atomicity: depth is validated and both operands are read before any
+   * mutation, so an underflow (depth < 2) — or a `fn` that throws — leaves the
+   * stack byte-for-byte unchanged (FR8/AC6). This is why `5 ENTER ×` modelled as
+   * `push(5)` then `applyBinary` underflows rather than yielding 25: a binary op
+   * needs two operands and the lone `5` is left untouched (AC5).
+   *
+   * @throws {StackUnderflowError} when depth < 2.
+   */
+  applyBinary(fn: (left: number, right: number) => number): void {
+    if (this.entries.length < 2) {
+      throw new StackUnderflowError();
+    }
+    const right = this.entries[this.entries.length - 1].value; // level 1
+    const left = this.entries[this.entries.length - 2].value; // level 2
+    const result = fn(left, right); // if this throws, nothing has mutated yet
+    this.entries.pop();
+    this.entries[this.entries.length - 1] = numberValue(result);
   }
 }
