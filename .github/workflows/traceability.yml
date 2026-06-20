@@ -1,0 +1,56 @@
+# Traceability gate (CALC-F01-W05).
+#
+# Enforces bidirectional traceability (FR5, FR6) on every pull request: the PR
+# title must carry a valid work-item id `[CALC-Fnn-Wnn]` AND the PR must link at
+# least one GitHub issue (via a closing keyword in the PR body / GitHub's
+# `closingIssuesReferences`).
+#
+# ── Always run, never skip ──────────────────────────────────────────────────
+# This job has NO `if:` and NO `paths:`/`paths-ignore:` filter, so it runs on
+# every `pull_request` event and reports a real pass/fail. That is deliberate:
+# a *skipped* required check reports as success on GitHub, which would let an
+# untagged PR merge straight through the gate (the exact trap AC5 forbids). The
+# only acceptable outcomes here are pass (conforming) or fail (non-conforming).
+#
+# ── Frozen check name ───────────────────────────────────────────────────────
+# The job name `traceability` is the string branch protection references as a
+# required status check (wired in CALC-F01-W08). Renaming it silently
+# un-requires the gate on `main`, so treat the name as a frozen contract.
+name: Traceability
+
+on:
+  pull_request:
+    # All default activity types plus `edited`, so re-titling a PR or editing
+    # its body (adding/removing the issue link) re-evaluates the gate.
+    types: [opened, reopened, synchronize, edited]
+
+# Least privilege: the GraphQL read of `closingIssuesReferences` needs read
+# access to the repo's pull requests (and issues). No write scope is granted.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  traceability:
+    name: traceability
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # Unit-test the gate's pure decision logic before trusting it on a real
+      # PR. No dependencies are needed — the script and tests are plain Node
+      # ESM using the built-in test runner.
+      - name: Unit tests
+        run: node --test 'scripts/*.test.mjs'
+
+      # The gate itself. Runs against the live PR payload and fails the check
+      # (exit non-zero) on any non-conforming PR.
+      - name: Check traceability
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-traceability.mjs
