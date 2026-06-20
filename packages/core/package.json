@@ -1,0 +1,29 @@
+{
+  "name": "@calc/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "UI-agnostic core library for the scientific calculator. Must not depend on any web/UI runtime.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  }
+}

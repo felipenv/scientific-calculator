@@ -1,0 +1,7 @@
+# Dependencies & build output
+node_modules/
+**/dist/
+*.tsbuildinfo
+
+# Generated / managed files
+pnpm-lock.yaml
