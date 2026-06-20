@@ -29,3 +29,4 @@ Add a row when you open a work item's PR.
 | -------------- | ----------------------------------------------- | ------------ |
 | `CALC-F02`     | UI-agnostic calculation engine core             | —            |
 | `CALC-F02-W01` | Shared error/result/angle-mode contract + guard | (this PR)    |
+| `CALC-F02-W04` | Exp/log + angle-mode-aware trig operators       | (this PR)    |

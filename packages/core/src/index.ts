@@ -27,3 +27,9 @@ export {
   isNegative,
   isNonNegative,
 } from './guard/finite.js';
+
+// Exp/log operators (CALC-F02): exp, ln, log10.
+export { exp, ln, log10 } from './ops/exp-log.js';
+
+// Angle-mode-aware trig / inverse-trig operators (CALC-F02).
+export { sin, cos, tan, asin, acos, atan } from './ops/trig.js';
