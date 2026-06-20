@@ -6,9 +6,11 @@
 // fixed register set, no silent data loss, and no top-register replication —
 // pushing simply grows the stack and dropping shrinks it.
 //
-// Scope (CALC-F03-W01): the read/write surface only — push, pop, peek, peekN,
-// depth. Operator application (applyUnary/applyBinary) and the management ops
-// (dup/swap/drop) arrive in later work items and build on this base.
+// Scope: the read/write surface — push, pop, peek, peekN, depth (CALC-F03-W01) —
+// plus the operator-application semantics applyUnary/applyBinary (CALC-F03-W02),
+// which consume operands and push results with correct arity, RPN operand order,
+// and atomic non-destructive underflow. The management ops (dup/swap/drop) arrive
+// in a later work item and build on this same base.
 
 import { StackUnderflowError } from './errors.js';
 import { numberValue, type StackValue } from './value.js';
@@ -77,5 +79,52 @@ export class RpnStack {
       out.push(this.#levels[top - i].value);
     }
     return out;
+  }
+
+  /**
+   * Apply a unary operator (e.g. reciprocal, sign change, sin, ln): consume
+   * level 1 and push exactly one result, leaving depth unchanged (FR3/AC3). The
+   * engine-supplied `fn` receives the level-1 operand and returns the result;
+   * this method governs only arity and consume/push, never the math itself —
+   * domain errors are the engine's concern (feature #2).
+   *
+   * Atomic and non-destructive: depth is validated before any mutation, and the
+   * result is computed before the stack is touched, so a depth-0 stack (or an
+   * `fn` that throws) leaves the stack exactly as it was (FR8/AC6).
+   */
+  applyUnary(fn: (a: number) => number): void {
+    if (this.#levels.length < 1) {
+      throw new StackUnderflowError();
+    }
+    const top = this.#levels.length - 1;
+    const result = fn(this.#levels[top].value);
+    // Only mutate once fn has returned, so a throwing fn is also non-destructive.
+    this.#levels[top] = numberValue(result);
+  }
+
+  /**
+   * Apply a binary operator (e.g. +, −, ×, ÷, power, root): consume levels 1 and
+   * 2 and push exactly one result, so depth decreases by 1 (FR4/AC2). Operand
+   * order follows RPN convention — `fn(level2, level1)`, i.e. level 2 is the left
+   * operand and level 1 the right — so `level2 − level1`, `level2 ÷ level1`, and
+   * `level2 ^ level1` come out correct. As with {@link applyUnary}, this governs
+   * only arity and consume/push; the math and any domain errors are the engine's.
+   *
+   * Atomic and non-destructive: depth is validated and the result computed before
+   * either operand is popped, so a depth < 2 stack (or a throwing `fn`) is left
+   * byte-for-byte unchanged (FR8/AC6).
+   */
+  applyBinary(fn: (left: number, right: number) => number): void {
+    if (this.#levels.length < 2) {
+      throw new StackUnderflowError();
+    }
+    const top = this.#levels.length - 1;
+    const left = this.#levels[top - 1].value; // level 2 — left operand
+    const right = this.#levels[top].value; // level 1 — right operand
+    const result = fn(left, right);
+    // Compute first, then consume the two operands and push the single result.
+    this.#levels.pop();
+    this.#levels.pop();
+    this.#levels.push(numberValue(result));
   }
 }
