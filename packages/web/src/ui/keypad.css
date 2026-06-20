@@ -1,0 +1,77 @@
+/*
+ * Calculator keypad styles (CALC-F04).
+ *
+ * Generic, original layout only: a plain button grid with a visible shift
+ * indicator. No HP trade dress — no model colours, key artwork, or legend
+ * placement (FR4/AC8). Feature work may restyle freely.
+ */
+
+.calc-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.calc-keypad__row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.calc-key {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  border: 1px solid currentColor;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+}
+
+.calc-key:hover {
+  filter: brightness(1.15);
+}
+
+.calc-key:active {
+  filter: brightness(0.9);
+}
+
+/* The wide ENTER key spans more of its row than a single key. */
+.calc-key--wide {
+  flex-grow: 2;
+}
+
+.calc-key__label {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+/* Faint hint of the shifted function, shown on dual keys for discoverability. */
+.calc-key__shift-hint {
+  display: block;
+  font-size: 0.7rem;
+  line-height: 1;
+  opacity: 0.55;
+}
+
+/* The shift key, and its pressed (layer-active) indicator. */
+.calc-key--shift[aria-pressed='true'] {
+  background: currentColor;
+  color: Canvas;
+}
+
+/* When the shift layer is active, emphasise the shifted hint over the primary
+ * label so the keypad reads as "this is what each key now does" (FR3). */
+.calc-keypad--shifted .calc-key[data-dual='true'] .calc-key__label {
+  opacity: 0.55;
+}
+
+.calc-keypad--shifted .calc-key[data-dual='true'] .calc-key__shift-hint {
+  opacity: 1;
+  font-weight: 600;
+}
