@@ -22,3 +22,11 @@ Add a row when you open a work item's PR.
 | `CALC-F01-W04` | CI pipeline (lint + format-check + test + build) | #4           |
 | `CALC-F01-W05` | Always-run traceability gate                     | #5           |
 | `CALC-F01-W07` | CONTRIBUTING, PR template & traceability docs    | (this PR)    |
+
+## Feature CALC-F02 — UI-agnostic calculation engine core
+
+| CALC- ID       | Work item                                                      | GitHub issue |
+| -------------- | -------------------------------------------------------------- | ------------ |
+| `CALC-F02`     | UI-agnostic calculation engine core                            | —            |
+| `CALC-F02-W01` | Library scaffold + shared error/result/angle contract          | (this PR)    |
+| `CALC-F02-W04` | Unary/misc operators (factorial, reciprocal, ±, percent) + π/e | (this PR)    |
