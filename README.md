@@ -8,10 +8,10 @@ This repository is being delivered feature by feature; the current state is the
 
 This is a [pnpm](https://pnpm.io/) workspace with two boundaried packages:
 
-| Package          | Path             | Role                                                      |
-| ---------------- | ---------------- | --------------------------------------------------------- |
-| `@calc/core`     | `packages/core`  | UI-agnostic calculator core. No web/UI runtime, ever.     |
-| `@calc/web`      | `packages/web`   | Web consumer. May depend on `@calc/core`; never reversed. |
+| Package      | Path            | Role                                                      |
+| ------------ | --------------- | --------------------------------------------------------- |
+| `@calc/core` | `packages/core` | UI-agnostic calculator core. No web/UI runtime, ever.     |
+| `@calc/web`  | `packages/web`  | Web consumer. May depend on `@calc/core`; never reversed. |
 
 The core/web boundary is the seam later features build on:
 
@@ -55,6 +55,27 @@ TypeScript project references. You can also build a single package:
 pnpm build:core
 pnpm build:web
 ```
+
+## Linting & formatting
+
+[ESLint](https://eslint.org/) (flat config, `eslint.config.js`) and
+[Prettier](https://prettier.io/) (`.prettierrc.json`) provide the lint and
+format conventions. The same commands run locally and in CI:
+
+```sh
+pnpm lint           # report lint problems (non-mutating)
+pnpm lint:fix       # auto-fix what ESLint can
+pnpm format         # rewrite files to Prettier style (mutating)
+pnpm format:check   # verify formatting without writing — used by CI
+```
+
+Each package also exposes scoped `lint`, `format`, and `format:check` scripts
+(e.g. `pnpm --filter @calc/core lint`).
+
+ESLint enforces the **core/web boundary**: the UI-agnostic `@calc/core` package
+may not import from `@calc/web` (by package name or relative path). Flat config
+does not read a `.eslintignore` file — excluded paths live in the `ignores`
+block of `eslint.config.js`.
 
 ## Status
 
