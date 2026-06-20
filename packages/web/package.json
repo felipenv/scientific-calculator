@@ -5,13 +5,18 @@
   "description": "Web consumer package for the scientific calculator. May depend on @calc/core; core never depends on web.",
   "type": "module",
   "scripts": {
-    "build": "tsc -b",
-    "clean": "tsc -b --clean",
+    "build": "tsc && vite build",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
     "lint": "eslint src",
     "format": "prettier --write src",
     "format:check": "prettier --check src"
   },
   "dependencies": {
     "@calc/core": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0"
   }
 }
