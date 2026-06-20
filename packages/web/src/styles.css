@@ -49,3 +49,44 @@ body {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
+
+/*
+ * Keypad focus indicator (FR22). The keypad's keys are native <button>s; this
+ * reinforces a clearly visible focus ring on them so keyboard users always see
+ * which key is focused, independent of the generic global rule above.
+ */
+.calc-key:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+
+/*
+ * Visually-hidden utility for screen-reader-only content (FR23). Used by the
+ * polite live region: the stack is shown visually by the display, so its
+ * contextual announcement ("Stack level 1: 42") is present for assistive tech
+ * but removed from view. Standard clip technique — kept off `display:none`/
+ * `visibility:hidden`, which would also hide it from screen readers.
+ */
+.calc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * The inline, transient error message (FR20). It is the visible face of the
+ * assertive `role="alert"` region, sitting in the status/entry area. Empty when
+ * there is no error (reserves no fixed space — it appears only when populated).
+ */
+.calc-live-error {
+  min-height: 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: right;
+}
