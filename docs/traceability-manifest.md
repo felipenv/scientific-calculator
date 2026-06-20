@@ -25,7 +25,8 @@ Add a row when you open a work item's PR.
 
 ## Feature CALC-F02 — UI-agnostic calculation engine core
 
-| CALC- ID       | Work item                                              | GitHub issue |
-| -------------- | ------------------------------------------------------ | ------------ |
-| `CALC-F02`     | UI-agnostic calculation engine core                    | —            |
-| `CALC-F02-W01` | Shared error/result/angle-mode contract + finite guard | (this PR)    |
+| CALC- ID       | Work item                                                                | GitHub issue |
+| -------------- | ------------------------------------------------------------------------ | ------------ |
+| `CALC-F02`     | UI-agnostic calculation engine core                                      | —            |
+| `CALC-F02-W01` | Shared error/result/angle-mode contract + finite guard                   | (this PR)    |
+| `CALC-F02-W05` | Unary/misc operators (factorial, reciprocal, ±, percent) + π/e constants | (this PR)    |

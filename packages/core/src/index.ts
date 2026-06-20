@@ -27,5 +27,9 @@ export {
   isZero,
 } from './guard/finite.js';
 
+// Unary / misc operators (FR14–FR17) and the full-precision constants (FR18).
+export { factorial, reciprocal, negate, percent } from './ops/unary.js';
+export { PI, E } from './constants.js';
+
 /** Scaffolding marker proving the core package builds and is importable. */
 export const CORE_PACKAGE = '@calc/core' as const;
