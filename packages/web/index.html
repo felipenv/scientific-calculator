@@ -8,12 +8,11 @@
   <body>
     <!--
       Vite uses this file as the app entry. `#app` is the single mount point the
-      shell renders into; `src/main.ts` (an ES module) bootstraps it. No
-      calculator UI lives here yet — the keypad, stack display, and dispatch
-      wiring arrive in later web features (CALC-F04+). This shell exists so the
-      build, dev server, and tests have a real DOM to grow into.
+      calculator renders into; `src/app.ts` (an ES module) composes the core,
+      display, and keypad and wires both input methods through the shared
+      dispatch controller (CALC-F04), then bootstraps on load.
     -->
     <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/app.ts"></script>
   </body>
 </html>
