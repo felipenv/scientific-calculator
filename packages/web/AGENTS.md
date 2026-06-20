@@ -10,15 +10,22 @@ contribution and traceability rules.
 `@calc/web` is the web-facing consumer of the calculator. It **may depend on
 `@calc/core`** (declared as `workspace:*`); the dependency only ever points
 web → core, never the reverse. It is built with [Vite](https://vitejs.dev/) and
-targets a browser runtime. Today it is a scaffold with no web UI.
+targets a browser runtime.
+
+Today it is a Vite app scaffold: `index.html` mounts `src/main.ts`, which renders
+an intentionally **empty** app shell (a titled container, no keypad/display). The
+real calculator UI arrives in later web features. Tests run under the **jsdom**
+environment so the shell can be exercised against a DOM.
 
 ## Build / test / lint / format commands
 
 Run from the repo root with a package filter, or from `packages/web` directly:
 
 ```sh
+pnpm --filter @calc/web dev           # vite dev server (local preview)
 pnpm --filter @calc/web build         # tsc && vite build
-pnpm --filter @calc/web test          # vitest run
+pnpm --filter @calc/web preview       # serve the production build
+pnpm --filter @calc/web test          # vitest run (jsdom)
 pnpm --filter @calc/web lint          # eslint src
 pnpm --filter @calc/web format        # prettier --write src
 pnpm --filter @calc/web format:check  # prettier --check src

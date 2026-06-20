@@ -6,7 +6,9 @@ This repository is being delivered feature by feature; the current state is the
 
 ## Repository layout
 
-This is a [pnpm](https://pnpm.io/) workspace with two boundaried packages:
+`@calc/web` is a Vite app whose `src/main.ts` renders an intentionally empty app
+shell today; the calculator UI lands in later features. This is a
+[pnpm](https://pnpm.io/) workspace with two boundaried packages:
 
 | Package      | Path            | Role                                                      |
 | ------------ | --------------- | --------------------------------------------------------- |
