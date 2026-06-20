@@ -2,9 +2,10 @@
 //
 // Publishes the F03-shared contract surface (the typed error taxonomy, the
 // `Result<T>` wrapper, and the core-level angle mode) plus the non-finite guard
-// that enforces the no-NaN/Infinity invariant. Operator implementations
-// (arithmetic, scientific functions, the registry) arrive in later work items
-// and build on this foundation.
+// that enforces the no-NaN/Infinity invariant. It also publishes the algebraic
+// operators (arithmetic, powers & roots); the remaining scientific functions
+// and the operator registry arrive in later work items and build on this
+// foundation.
 //
 // Invariant: this package must never import a web/UI runtime (e.g. the DOM).
 
@@ -26,6 +27,9 @@ export {
   isNonNegative,
   isZero,
 } from './guard/finite.js';
+
+export { add, subtract, multiply, divide } from './ops/arithmetic.js';
+export { power, square, sqrt, nthRoot } from './ops/powers.js';
 
 /** Scaffolding marker proving the core package builds and is importable. */
 export const CORE_PACKAGE = '@calc/core' as const;
