@@ -24,6 +24,11 @@ import {
   Registry,
   defaultRegistry,
   OPERATORS,
+  RpnStack,
+  StackUnderflowError,
+  STACK_UNDERFLOW_MESSAGE,
+  numberValue,
+  isNumberValue,
 } from './index.js';
 
 describe('@calc/core public surface', () => {
@@ -57,5 +62,17 @@ describe('@calc/core public surface', () => {
     const core = new CalcCore();
     expect(core.angleMode).toBe(AngleMode.Degrees);
     expect(core.apply('add', [2, 3])).toEqual({ ok: true, value: 5 });
+  });
+
+  it('re-exports the RPN stack core, value model, and error contract (F03)', () => {
+    const stack = new RpnStack();
+    stack.push(3);
+    stack.push(4);
+    expect(stack.peekN(2)).toEqual([4, 3]);
+
+    expect(STACK_UNDERFLOW_MESSAGE).toBe('Error: Stack underflow');
+    expect(new StackUnderflowError()).toBeInstanceOf(Error);
+    expect(numberValue(1)).toEqual({ type: 'number', value: 1 });
+    expect(isNumberValue(numberValue(1))).toBe(true);
   });
 });
