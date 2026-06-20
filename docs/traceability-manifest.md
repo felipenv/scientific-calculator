@@ -28,4 +28,5 @@ Add a row when you open a work item's PR.
 | CALC- ID       | Work item                                       | GitHub issue |
 | -------------- | ----------------------------------------------- | ------------ |
 | `CALC-F02`     | UI-agnostic calculation engine core             | —            |
-| `CALC-F02-W01` | Shared error/result/angle-mode contract + guard | (this PR)    |
+| `CALC-F02-W01` | Shared error/result/angle-mode contract + guard | #18          |
+| `CALC-F02-W02` | Arithmetic + powers/roots operators with guard  | (this PR)    |

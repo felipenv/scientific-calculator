@@ -1,9 +1,10 @@
 // @calc/core — UI-agnostic core library entrypoint.
 //
-// Operator implementations (arithmetic, scientific functions, the RPN engine)
-// arrive in later work items. What is published today is the foundational,
-// F03-shared surface: the error/result/angle-mode contract and the non-finite
-// guard that enforces the "never leak NaN/Infinity" invariant.
+// Published today: the foundational, F03-shared surface (the error/result/
+// angle-mode contract and the non-finite guard that enforces the "never leak
+// NaN/Infinity" invariant) plus the algebraic operators — arithmetic and
+// powers/roots. The remaining scientific functions and the RPN engine arrive in
+// later work items.
 //
 // Invariant: this package must never import a web/UI runtime (e.g. the DOM).
 
@@ -27,3 +28,9 @@ export {
   isNegative,
   isNonNegative,
 } from './guard/finite.js';
+
+// Arithmetic operators (CALC-F02): add, subtract, multiply, divide.
+export { add, subtract, multiply, divide } from './ops/arithmetic.js';
+
+// Powers & roots operators (CALC-F02): power, square, sqrt, nthRoot.
+export { power, square, sqrt, nthRoot } from './ops/powers.js';
