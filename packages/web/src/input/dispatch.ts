@@ -23,6 +23,7 @@ import {
 } from '../core/contract.js';
 import type { DisplayHandle } from '../ui/display.js';
 import type { KeypadHandle } from '../ui/keypad.js';
+import type { LiveRegionsHandle } from '../ui/live-regions.js';
 import { commandForKey, isAngleModeToggleKey } from './keymap.js';
 
 /** Collaborators the controller drives. */
@@ -33,6 +34,13 @@ export interface DispatchOptions {
   readonly display: DisplayHandle;
   /** The keypad, whose shift indicator is mirrored from the core's state. */
   readonly keypad: KeypadHandle;
+  /**
+   * The accessibility live regions, re-announced after every command so a
+   * polite contextual result or an assertive error follows each input
+   * (FR20/FR23/FR24). Optional: a controller wired without it still drives the
+   * visual views; the announcement layer is simply absent.
+   */
+  readonly liveRegions?: LiveRegionsHandle;
 }
 
 /** The minimal slice of `EventTarget` the keyboard handler attaches to. */
@@ -75,14 +83,15 @@ export interface DispatchController {
  * global document).
  */
 export function createDispatch(options: DispatchOptions): DispatchController {
-  const { core, display, keypad } = options;
+  const { core, display, keypad, liveRegions } = options;
 
   let state: CalcState = core.state;
 
-  /** Push the current state into both views (the only render path). */
+  /** Push the current state into every view sink (the only render path). */
   const render = (): void => {
     display.update(state);
     keypad.setShift(state.shift);
+    liveRegions?.update(state);
   };
 
   const dispatch = (command: Command): CalcState => {

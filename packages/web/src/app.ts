@@ -18,6 +18,7 @@ import { StubCalculatorCore } from './core/stub-core.js';
 import { createDispatch, type DispatchController } from './input/dispatch.js';
 import { createDisplay } from './ui/display.js';
 import { createKeypad } from './ui/keypad.js';
+import { createLiveRegions } from './ui/live-regions.js';
 
 /** Id of the mount element declared in `index.html`. */
 export const MOUNT_ID = 'app';
@@ -33,7 +34,8 @@ export interface AppHandle {
 /**
  * Build the full calculator UI and wire it to a fresh core.
  *
- * Assembles a titled shell containing the display above the keypad. The keypad
+ * Assembles a titled shell containing the display, the accessibility live
+ * regions, and the keypad. The keypad
  * forwards every key press to {@link DispatchController.dispatch}; the keyboard
  * is NOT attached here (the caller chooses the target via
  * {@link DispatchController.attachKeyboard}), keeping this pure and testable.
@@ -48,6 +50,10 @@ export function createApp(doc: Document): AppHandle {
   title.textContent = 'Scientific Calculator';
 
   const display = createDisplay(doc);
+  // The accessibility live regions sit in the status/entry area between the
+  // display and the keypad: the assertive region doubles as the visible inline
+  // error (FR20), and both regions exist in the DOM from first paint (FR24).
+  const liveRegions = createLiveRegions(doc);
   const keypad = createKeypad(doc, {
     // Single shared path: a click becomes a command dispatched exactly as a
     // keystroke is. `controller` is assigned just below, before any click.
@@ -55,9 +61,9 @@ export function createApp(doc: Document): AppHandle {
   });
 
   const core = new StubCalculatorCore();
-  const controller = createDispatch({ core, display, keypad });
+  const controller = createDispatch({ core, display, keypad, liveRegions });
 
-  shell.append(title, display.element, keypad.element);
+  shell.append(title, display.element, liveRegions.element, keypad.element);
 
   return { element: shell, controller };
 }
