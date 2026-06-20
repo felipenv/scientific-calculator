@@ -22,7 +22,9 @@ export default defineConfig({
     // the suite runs without first building @calc/core (its package entrypoint
     // points at the un-committed dist/ output).
     alias: {
-      '@calc/core': fileURLToPath(new URL('../core/src/index.ts', import.meta.url)),
+      '@calc/core': fileURLToPath(
+        new URL('../core/src/index.ts', import.meta.url),
+      ),
     },
   },
 });
