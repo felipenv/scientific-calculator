@@ -14,8 +14,16 @@
 //
 // This file carries the read/write foundation — `push`, `pop`, `peek`, `peekN`,
 // `depth` — plus the operator-application semantics `applyUnary`/`applyBinary`
-// (CALC-F03; FR3/FR4/FR8) that consume operands and push results. The management
-// ops (dup/swap/drop) land in a later F03 work item on top of this surface.
+// (CALC-F03; FR3/FR4/FR8) that consume operands and push results, and the
+// stack-management ops `dup`/`swap`/`drop` (CALC-F03; FR6/FR7) that explicitly
+// duplicate, exchange, and discard top entries.
+//
+// ENTER vs. DUP: ENTER (digit-entry termination, FR5) commits the operand being
+// typed and maps to `push` of that pending value — the pending-entry buffering
+// is a Web Calculator Interface (F04/UI) concern, not the core's. The core keeps
+// ENTER and DUP distinct: ENTER performs *no* auto-lift and *no* duplication
+// (AC5/AC10); duplicating an existing level-1 entry is the separate, explicit
+// `dup` operation (FR6).
 //
 // Operator application is deliberately decoupled from the Calculation Engine
 // Core (F02): the apply methods take a plain numeric function and push back
@@ -100,6 +108,56 @@ export class RpnStack {
       top.push(this.entries[this.entries.length - 1 - i].value);
     }
     return top;
+  }
+
+  /**
+   * Duplicate level 1 (DUP, FR6/AC4). Copies the level-1 value and pushes the
+   * copy, so the former level 1 becomes level 2 and an identical value occupies
+   * level 1. Net depth change: +1.
+   *
+   * This is the *explicit* duplication path — ENTER does not duplicate (AC5).
+   * The value is copied, not shared: entries are immutable `StackValue` wrappers,
+   * so the two top levels hold the same double without aliasing.
+   *
+   * @throws {StackUnderflowError} when the stack is empty (depth < 1). The depth
+   *   check runs before any mutation, so the stack is unchanged on throw (FR8/AC6).
+   */
+  dup(): void {
+    if (this.entries.length < 1) {
+      throw new StackUnderflowError();
+    }
+    this.entries.push(this.entries[this.entries.length - 1]);
+  }
+
+  /**
+   * Exchange levels 1 and 2 (SWAP, FR7/AC4). Net depth change: 0.
+   *
+   * @throws {StackUnderflowError} when depth < 2. The depth check runs before any
+   *   mutation, so the stack is unchanged on throw (FR8/AC6).
+   */
+  swap(): void {
+    if (this.entries.length < 2) {
+      throw new StackUnderflowError();
+    }
+    const top = this.entries.length - 1;
+    const tmp = this.entries[top];
+    this.entries[top] = this.entries[top - 1];
+    this.entries[top - 1] = tmp;
+  }
+
+  /**
+   * Discard level 1 (DROP, FR7/AC4), shifting every higher level down one level.
+   * Net depth change: −1. Unlike a classic fixed stack there is no top-copy on
+   * drop and no T-register replication (AC10) — the level is simply removed.
+   *
+   * @throws {StackUnderflowError} when the stack is empty (depth < 1). The depth
+   *   check runs before any mutation, so the stack is unchanged on throw (FR8/AC6).
+   */
+  drop(): void {
+    if (this.entries.length < 1) {
+      throw new StackUnderflowError();
+    }
+    this.entries.pop();
   }
 
   /**
