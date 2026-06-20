@@ -27,3 +27,9 @@ export {
   isNegative,
   isNonNegative,
 } from './guard/finite.js';
+
+// Full-precision mathematical constants (CALC-F02): pi and e.
+export { PI, E } from './constants.js';
+
+// Unary / misc operators (CALC-F02): factorial, reciprocal, sign change, percent.
+export { factorial, reciprocal, negate, percent } from './ops/unary.js';
