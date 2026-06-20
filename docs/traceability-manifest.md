@@ -22,6 +22,7 @@ Add a row when you open a work item's PR.
 | `CALC-F01-W04` | CI pipeline (lint + format-check + test + build) | #4           |
 | `CALC-F01-W05` | Always-run traceability gate                     | #5           |
 | `CALC-F01-W07` | CONTRIBUTING, PR template & traceability docs    | (this PR)    |
+| `CALC-F01-W09` | Web app shell: entry HTML + mount + empty shell  | (this PR)    |
 
 ## Feature CALC-F02 — UI-agnostic calculation engine core
 
