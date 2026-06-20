@@ -6,9 +6,18 @@
 // fixed register set, no silent data loss, and no top-register replication —
 // pushing simply grows the stack and dropping shrinks it.
 //
-// Scope (CALC-F03-W01): the read/write surface only — push, pop, peek, peekN,
-// depth. Operator application (applyUnary/applyBinary) and the management ops
-// (dup/swap/drop) arrive in later work items and build on this base.
+// Scope (CALC-F03-W01): the read/write surface — push, pop, peek, peekN, depth.
+// CALC-F03-W03 adds the stack-management ops dup/swap/drop. Operator application
+// (applyUnary/applyBinary) arrives in a later work item and builds on this base.
+//
+// ENTER vs. DUP (FR5/AC5/AC10): ENTER is digit-entry termination — it commits the
+// operand currently being typed as a new level-1 entry, which at the core layer
+// is simply `push` of that operand (the pending-entry buffer is a UI / feature #4
+// concern, not the core's). ENTER performs NO auto-lift and NO duplication: there
+// is deliberately no classic stack-lift-on-ENTER and no top-copy. Duplication is a
+// separate, explicit action, performed only via `dup` below. So `5 ENTER ×` does
+// not yield 25 — with a single operand a binary op underflows; the stack model
+// keeps ENTER (push) and DUP strictly distinct.
 
 import { StackUnderflowError } from './errors.js';
 import { numberValue, type StackValue } from './value.js';
@@ -77,5 +86,50 @@ export class RpnStack {
       out.push(this.#levels[top - i].value);
     }
     return out;
+  }
+
+  /**
+   * DUP — duplicate level 1 (FR6). The former level 1 becomes level 2 and an
+   * identical value occupies level 1; depth increases by exactly 1. Requires
+   * depth ≥ 1; otherwise throws {@link StackUnderflowError} non-destructively,
+   * leaving the stack exactly as it was (FR8/AC6). This is the only way to
+   * duplicate — ENTER never does (see the ENTER vs. DUP note above).
+   */
+  dup(): void {
+    if (this.#levels.length < 1) {
+      throw new StackUnderflowError();
+    }
+    // StackValue is deeply immutable, so sharing the reference is safe and stays
+    // value-type-agnostic (FR11) — no `number`-only assumption here.
+    this.#levels.push(this.#levels[this.#levels.length - 1]);
+  }
+
+  /**
+   * SWAP — exchange the values at levels 1 and 2 (FR7). Depth is unchanged.
+   * Requires depth ≥ 2; otherwise throws {@link StackUnderflowError}
+   * non-destructively, leaving the stack exactly as it was (FR8/AC6).
+   */
+  swap(): void {
+    if (this.#levels.length < 2) {
+      throw new StackUnderflowError();
+    }
+    const top = this.#levels.length - 1;
+    const tmp = this.#levels[top];
+    this.#levels[top] = this.#levels[top - 1];
+    this.#levels[top - 1] = tmp;
+  }
+
+  /**
+   * DROP — discard level 1, shifting every higher level down by one (FR7).
+   * Depth decreases by exactly 1. Requires depth ≥ 1; otherwise throws
+   * {@link StackUnderflowError} non-destructively, leaving the stack exactly as
+   * it was (FR8/AC6). Unlike a classic fixed stack, nothing is copied into the
+   * emptied level — no T-register replication (AC10).
+   */
+  drop(): void {
+    if (this.#levels.length < 1) {
+      throw new StackUnderflowError();
+    }
+    this.#levels.pop();
   }
 }

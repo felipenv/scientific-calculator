@@ -145,6 +145,132 @@ describe('RpnStack — non-destructive read underflow (AC6, FR8)', () => {
   });
 });
 
+describe('RpnStack — DUP (AC4, FR6)', () => {
+  it('duplicates level 1: two identical tops and depth +1', () => {
+    const s = new RpnStack();
+    s.push(5);
+    s.dup();
+    expect(s.depth()).toBe(2);
+    // Former level 1 is now level 2; an identical value occupies level 1.
+    expect(s.peekN(2)).toEqual([5, 5]);
+  });
+
+  it('duplicates the top only, leaving lower levels untouched', () => {
+    const s = new RpnStack();
+    s.push(1);
+    s.push(2);
+    s.dup();
+    expect(s.peekN(3)).toEqual([2, 2, 1]);
+  });
+
+  it('5 DUP × demonstrates duplication is via DUP, not ENTER (AC5)', () => {
+    // The user duplicates explicitly, then a binary op can square the value.
+    // (The × itself lands with applyBinary in a later work item; here we show
+    // DUP produces the two operands a square needs.)
+    const s = new RpnStack();
+    s.push(5);
+    s.dup();
+    expect(s.peekN(2)).toEqual([5, 5]);
+  });
+});
+
+describe('RpnStack — SWAP (AC4, FR7)', () => {
+  it('exchanges the top two values, depth unchanged', () => {
+    const s = new RpnStack();
+    s.push(1);
+    s.push(2);
+    s.swap();
+    expect(s.depth()).toBe(2);
+    expect(s.peekN(2)).toEqual([1, 2]);
+  });
+
+  it('leaves levels below the top two untouched', () => {
+    const s = new RpnStack();
+    s.push(1);
+    s.push(2);
+    s.push(3);
+    s.swap();
+    expect(s.peekN(3)).toEqual([2, 3, 1]);
+  });
+});
+
+describe('RpnStack — DROP (AC4, FR7)', () => {
+  it('removes level 1 and decreases depth by 1', () => {
+    const s = new RpnStack();
+    s.push(1);
+    s.push(2);
+    s.drop();
+    expect(s.depth()).toBe(1);
+    expect(s.peek()).toBe(1);
+  });
+
+  it('shifts higher levels down by one', () => {
+    const s = new RpnStack();
+    s.push(1);
+    s.push(2);
+    s.push(3);
+    s.drop();
+    expect(s.peekN(2)).toEqual([2, 1]);
+  });
+});
+
+describe('RpnStack — management-op underflow is non-destructive (AC6, FR8)', () => {
+  it('DUP on an empty stack throws and leaves it empty', () => {
+    const s = new RpnStack();
+    expect(() => s.dup()).toThrow(StackUnderflowError);
+    expect(() => s.dup()).toThrow('Error: Stack underflow');
+    expect(s.depth()).toBe(0);
+  });
+
+  it('DROP on an empty stack throws and leaves it empty', () => {
+    const s = new RpnStack();
+    expect(() => s.drop()).toThrow(StackUnderflowError);
+    expect(() => s.drop()).toThrow('Error: Stack underflow');
+    expect(s.depth()).toBe(0);
+  });
+
+  it('SWAP at depth 1 throws and leaves the stack exactly as it was', () => {
+    const s = new RpnStack();
+    s.push(42);
+    const before = s.peekN(s.depth());
+    expect(() => s.swap()).toThrow(StackUnderflowError);
+    // Stack identical to its pre-call state: depth and all level values.
+    expect(s.depth()).toBe(1);
+    expect(s.peekN(s.depth())).toEqual(before);
+  });
+
+  it('SWAP on an empty stack throws and leaves it empty', () => {
+    const s = new RpnStack();
+    expect(() => s.swap()).toThrow(StackUnderflowError);
+    expect(s.depth()).toBe(0);
+  });
+});
+
+describe('RpnStack — no classic-stack behavior in management ops (AC10)', () => {
+  it('DROP does not replicate a register into the emptied level (no T-register)', () => {
+    const s = new RpnStack();
+    s.push(1);
+    s.push(2);
+    s.drop();
+    // The single remaining entry is the original level 2; nothing was copied
+    // down to fill the vacated top.
+    expect(s.depth()).toBe(1);
+    expect(s.peekN(1)).toEqual([1]);
+  });
+
+  it('DUP copies only on explicit request — there is no auto-lift', () => {
+    // Pushing never duplicates (that would be classic stack-lift); only an
+    // explicit dup() does. push then push yields two distinct values, not a copy.
+    const s = new RpnStack();
+    s.push(7);
+    s.push(8);
+    expect(s.peekN(2)).toEqual([8, 7]);
+    // And dup() is what produces an identical pair.
+    s.dup();
+    expect(s.peekN(3)).toEqual([8, 8, 7]);
+  });
+});
+
 describe('RpnStack — UI-free exercisability (AC9)', () => {
   it('drives a full push/read/pop session with no UI dependency', () => {
     // The entire surface is reachable from a plain (non-UI) caller; this test
