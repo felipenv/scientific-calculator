@@ -38,6 +38,17 @@ export { Registry, defaultRegistry } from './registry/registry.js';
 export { OPERATORS } from './registry/operators.js';
 export type { Operator, OperatorApply } from './registry/operators.js';
 
+// Dynamic RPN stack core (FR1/FR2/FR9/FR10) + the typed-ready value model
+// (FR11) and the core-owned `Error: Stack underflow` contract (FR8). This is the
+// stack surface feature #4 drives and imports the error from.
+export { RpnStack } from './stack/stack.js';
+export {
+  StackUnderflowError,
+  STACK_UNDERFLOW_MESSAGE,
+} from './stack/errors.js';
+export { numberValue, isNumberValue } from './stack/value.js';
+export type { StackValue, NumberValue } from './stack/value.js';
+
 /**
  * Package-identity marker. Retained from the CALC-F01 scaffold: it proves the
  * package is importable and backs the web->core seam test in `@calc/web`.
