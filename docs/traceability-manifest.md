@@ -30,3 +30,11 @@ Add a row when you open a work item's PR.
 | `CALC-F02`     | UI-agnostic calculation engine core                            | —            |
 | `CALC-F02-W01` | Library scaffold + shared error/result/angle contract          | (this PR)    |
 | `CALC-F02-W04` | Unary/misc operators (factorial, reciprocal, ±, percent) + π/e | (this PR)    |
+
+## Feature CALC-F03 — RPN stack & evaluation core
+
+| CALC- ID       | Work item                                                  | GitHub issue |
+| -------------- | ---------------------------------------------------------- | ------------ |
+| `CALC-F03`     | RPN stack & evaluation core                                | —            |
+| `CALC-F03-W01` | Bootstrap dynamic RPN stack core + value model + underflow | #28          |
+| `CALC-F03-W02` | Operator-application semantics (atomic unary/binary apply) | (this PR)    |
