@@ -1,0 +1,14 @@
+{
+  "name": "@calc/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Web consumer package for the scientific calculator. May depend on @calc/core; core never depends on web.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@calc/core": "workspace:*"
+  }
+}
