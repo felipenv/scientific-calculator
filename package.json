@@ -15,6 +15,7 @@
     "build:core": "pnpm --filter @calc/core build",
     "build:web": "pnpm --filter @calc/web... build",
     "test": "pnpm -r test",
+    "test:traceability": "node --test 'scripts/*.test.mjs'",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
